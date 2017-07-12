@@ -4,8 +4,10 @@ import time
 
 class UPS:
     def read(self):
-        time.sleep(3)
-        return random.randint(0, 1)
+        return {
+            'routerIp': '127.0.0.1',
+            'isPowerDown':  (random.randint(0, 1) == 0)
+        }
 
 
 class UPSListener:
@@ -13,7 +15,7 @@ class UPSListener:
     startTime = None
     endTime = None
 
-    upsInstance= None
+    upsInstance = None
     onPowerUp = None
     onPowerDown = None
 
@@ -23,28 +25,29 @@ class UPSListener:
         self.onPowerDown = onPowerDown
 
     def TurnOn(self):
-        self.previousState = 1
+        self.previousState = False
         self.startTime = time.time()
 
         while True:
-            state = self.upsInstance.read()
+            time.sleep(3)
+            UPSResponse = self.upsInstance.read()
 
-            if state != self.previousState:
-                self.TriggerStateEvent(state == 1)
-                self.previousState = state
+            if UPSResponse['isPowerDown'] != self.previousState:
+                self.TriggerStateEvent(UPSResponse)
+                self.previousState = UPSResponse['isPowerDown']
 
-    def TriggerStateEvent(self, isPowerDown):
+    def TriggerStateEvent(self, UPSResponse):
         self.endTime = time.time()
 
-        response = {
+        callbackModel = {
             'timeElapsed': self.inSeconds(self.endTime - self.startTime),
-            'routerIp': '127.0.0.1'
+            'routerIp': UPSResponse['routerIp']
         }
 
-        if (isPowerDown is True):
-            self.onPowerDown(response)
+        if UPSResponse['isPowerDown'] is True:
+            self.onPowerDown(callbackModel)
         else:
-            self.onPowerUp(response)
+            self.onPowerUp(callbackModel)
 
         self.startTime = time.time()
 
@@ -64,10 +67,12 @@ class UPSListener:
         return Seconds
 
 #def onPowerUp(param):
+#    print("Up")
 #    print("Time elapsed ", param['timeElapsed'], " seconds")
 #    print("Router IP ", param['routerIp'])
 #
 #def onPowerDown(param):
+#    print("Down")
 #    print("Time elapsed ", param['timeElapsed'], " seconds")
 #    print("Router IP ", param['routerIp'])
 #
