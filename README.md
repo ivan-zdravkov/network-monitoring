@@ -10,6 +10,5 @@ Network Monitoring System is team effort for the [Distributed Embeded Systems](h
 
 ## Setup
 * [SourceTree](https://www.sourcetreeapp.com/) - git client. (optional, other git clients are valid as well)
-* [SQL Server 2016 Express Edition](https://www.microsoft.com/en-us/sql-server/sql-server-editions-express) - database instance.
-* [SQL Server Management Studio (SSMS)](https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms) - Database Management Tool. (optional)
-* [Visual Studio 2016 Community Editon](https://www.visualstudio.com/downloads/) - Integrated Development Environment
+* [Python 3.6.1](https://www.python.org/downloads/) - Python.
+* [MongoDB](https://www.mongodb.com/) - NoSQL Database
