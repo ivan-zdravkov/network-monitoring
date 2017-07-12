@@ -3,6 +3,7 @@
 from NetworkConnectivity import NetworkConnectivity
 from UPSListener import UPS
 from UPSListener import UPSListener
+from MongoDBRepo import MongoDBRepo
 from SMTP import SMTP
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
@@ -16,6 +17,7 @@ class RequestHandler(BaseHTTPRequestHandler):
     def __init__(self):
         NetworkConnectivity(self.onPingPass, self.onPingFail).listenOn("8.8.8.8")
         UPSListener(UPS(), self.onPowerOn, self.onPowerOff).TurnOn()
+        self.repo = MongoDBRepo()
 
     def get_routing(self, x):
         return {
@@ -29,58 +31,49 @@ class RequestHandler(BaseHTTPRequestHandler):
         return 'Welcome to the HTTP Services'
 
     def get_temperature(self):
-        temperature = self.getCurrentTemperature()
-        return "The current temperature is " + str(temperature)
+        return "The current temperature is " + str(self.repo.getTemperature())
 
     def get_UPS_Status(self):
-        return "The UPS is currently: " + 'ON' if self.getUPSStatus() else 'OFF'
+        return "The UPS is currently: " + 'ON' if self.repo.getUPSStatus() else 'OFF'
 
     def ping_is_passing(self):
-        return "The internet connection is " + 'ON' if self.getInternetStatus() else 'OFF'
+        return "The internet connection is " + 'ON' if self.repo.getInternetStatus() else 'OFF'
 
     def onPingPass(self, params):
-        self.updateInternetStatus(self, True, params)
+        self.updateInternetStatus(True, params)
         return
 
     def onPingFail(self, params):
-        self.updateInternetStatus(self, False, params)
+        self.updateInternetStatus(False, params)
         return
 
     def onPowerOn(self, params):
-        self.updateUPSStatus(self, True, params)
+        self.updateUPSStatus(True, params)
         return
 
     def onPowerOff(self, params):
-        self.updateUPSStatus(self, False, params)
+        self.updateUPSStatus(False, params)
         return
-
-    def getCurrentTemperature(self):
-        #ToDo: Get Temperature from MongoDB
-        return 30.0
-
-    def getUPSStatus(self):
-        #ToDo: Get Ups Status from MongoDB
-        return True
-
-    def getInternetStatus(self):
-        #ToDo: Get Internet Status from MongoDB
-        return True
 
     def updateUPSStatus(self, isUpsOn, data):
         data.isUpsOn = isUpsOn
-        #ToDo: Save UPS Status in MongoDB
-        if self.getInternetStatus() is True:
+        self.repo.updateUPSStatus(data)
+
+        if self.repo.getInternetStatus() is True:
             if isUpsOn is True:
                 self.sendEmail('Power ON', 'Power just came back!')
             else:
                 self.sendEmail('Power DOWN', 'Power went down!')
+
         return
 
     def updateInternetStatus(self, isThereInternet, data):
         data.isThereInternet = isThereInternet
-        #ToDo: Save Internet Status in MongoDB
+        self.repo.updateInternetStatus(data)
+
         if isThereInternet is True:
             self.sendEmail('Internet ON', 'The internet just came ON on the server!')
+
         return
 
     def sendEmail(self, subject, message):
