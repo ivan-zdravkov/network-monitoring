@@ -3,12 +3,13 @@ import platform
 
 
 class NetworkConnectivity:
+    previousState = True
     onPingPass = None
     onPingFail = None
 
-    def __init__(self, _onPingPass, _onPingFail):
-        self.onPingPass = _onPingPass
-        self.onPingFail = _onPingFail
+    def __init__(self, onPingPass, onPingFail):
+        self.onPingPass = onPingPass
+        self.onPingFail = onPingFail
 
     def listenOn(self, host):
         while True:
@@ -19,10 +20,13 @@ class NetworkConnectivity:
                 'host': host
             }
 
-            if (passed is True):
-                self.onPingPass(response)
-            else:
-                self.onPingFail(response)
+            if passed != self.previousState:
+                if passed is True:
+                    self.onPingPass(response)
+                else:
+                    self.onPingFail(response)
+
+                self.previousState = passed
 
     def ping(self, host):
         """

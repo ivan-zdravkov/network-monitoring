@@ -11,7 +11,7 @@ class UPS:
 
 
 class UPSListener:
-    previousState = 0
+    previousState = False
     startTime = None
     endTime = None
 
@@ -23,9 +23,7 @@ class UPSListener:
         self.upsInstance = upsInstance
         self.onPowerUp = onPowerUp
         self.onPowerDown = onPowerDown
-
     def TurnOn(self):
-        self.previousState = False
         self.startTime = time.time()
 
         while True:
