@@ -5,8 +5,9 @@ import time
 class UPS:
     def read(self):
         return {
-            'routerIp': '127.0.0.1',
-            'isPowerDown':  (random.randint(0, 1) == 0)
+            'isPowerDown':  (random.randint(0, 1) == 0),
+            'batteryLifeTime': 30,
+            'batteryFullLifeTime': 120
         }
 
 
@@ -39,7 +40,8 @@ class UPSListener:
 
         callbackModel = {
             'timeElapsed': self.inSeconds(self.endTime - self.startTime),
-            'routerIp': UPSResponse['routerIp']
+            'batteryLifeTime': UPSResponse['batteryLifeTime'],
+            'batteryFullLifeTime': UPSResponse['batteryFullLifeTime']
         }
 
         if UPSResponse['isPowerDown'] is True:
@@ -67,12 +69,14 @@ class UPSListener:
 #def onPowerUp(param):
 #    print("Up")
 #    print("Time elapsed ", param['timeElapsed'], " seconds")
-#    print("Router IP ", param['routerIp'])
+#    print("Battery Life Time ", param['batteryLifeTime'], ' min')
+#    print()
 #
 #def onPowerDown(param):
 #    print("Down")
 #    print("Time elapsed ", param['timeElapsed'], " seconds")
-#    print("Router IP ", param['routerIp'])
+#    print("Battery Life Time ", param['batteryLifeTime'], ' min')
+#    print()
 #
 #UPSSimulator = UPS()
 #
