@@ -24,6 +24,7 @@ class UPSListener:
         self.upsInstance = upsInstance
         self.onPowerUp = onPowerUp
         self.onPowerDown = onPowerDown
+
     def TurnOn(self):
         self.startTime = time.time()
 
