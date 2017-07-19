@@ -14,11 +14,11 @@ class MongoDBRepo:
         return True
 
     def getInternetStatus(self):
-        return True
+        return True#return self.db['internetStatus'].find()[0]
 
     def updateUPSStatus(self, data):
-        return self.db.ups.insert_one(data).inserted_id
+        return self.db['ups'].insert_one(data).inserted_id
 
     def updateInternetStatus(self, data):
-        return self.db.internetStatus.insert_one(data).inserted_id
+        return self.db['internetStatus'].insert_one(data).inserted_id
 

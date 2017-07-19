@@ -29,7 +29,7 @@ class UPSListener:
         self.startTime = time.time()
 
         while True:
-            time.sleep(3)
+            time.sleep(15)
             UPSResponse = self.upsInstance.read()
 
             if UPSResponse['isPowerDown'] != self.previousState:

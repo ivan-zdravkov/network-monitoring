@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import _thread
 from NetworkConnectivity import NetworkConnectivity
 from UPSListener import UPS
 from UPSListener import UPSListener
@@ -13,10 +14,10 @@ class RequestHandler(BaseHTTPRequestHandler):
     sender = 'tuplovdivproject@gmail.com'
     password = '61530412'
     receivers = ['IvanZdravkovBG@gmail.com', 'Trifon.Dardzhonov@gmail.com']
+    repo = None
+    isThereInternet = True
 
-    def __init__(self):
-        NetworkConnectivity(self.onPingPass, self.onPingFail).listenOn("8.8.8.8")
-        UPSListener(UPS(), self.onPowerOn, self.onPowerOff).TurnOn()
+    def __init__(self, request, client_address, server):
         self.repo = MongoDBRepo()
 
     def get_routing(self, x):
@@ -40,11 +41,15 @@ class RequestHandler(BaseHTTPRequestHandler):
         return "The internet connection is " + 'ON' if self.repo.getInternetStatus() else 'OFF'
 
     def onPingPass(self, params):
-        self.updateInternetStatus(True, params)
+        self.isThereInternet = True
+        self.updateInternetStatus(params)
+
         return
 
     def onPingFail(self, params):
-        self.updateInternetStatus(False, params)
+        self.isThereInternet = False
+        self.updateInternetStatus(params)
+
         return
 
     def onPowerOn(self, params):
@@ -56,10 +61,10 @@ class RequestHandler(BaseHTTPRequestHandler):
         return
 
     def updateUPSStatus(self, isUpsOn, data):
-        data.isUpsOn = isUpsOn
-        self.repo.updateUPSStatus(data)
+        data['isUpsOn'] = isUpsOn
+        insertedId = self.repo.updateUPSStatus(data)
 
-        if self.repo.getInternetStatus() is True:
+        if self.isThereInternet is True:
             if isUpsOn is True:
                 self.sendEmail('Power ON', 'Power just came back!')
             else:
@@ -67,11 +72,11 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         return
 
-    def updateInternetStatus(self, isThereInternet, data):
-        data.isThereInternet = isThereInternet
-        self.repo.updateInternetStatus(data)
+    def updateInternetStatus(self, data):
+        data['isThereInternet'] = self.isThereInternet
+        insertedId = self.repo.updateInternetStatus(data)
 
-        if isThereInternet is True:
+        if self.isThereInternet is True:
             self.sendEmail('Internet ON', 'The internet just came ON on the server!')
 
         return
@@ -104,6 +109,16 @@ def run():
     # Choose port 8080, for port 80, which is normally used for a http server, you need root access
     server_address = ('127.0.0.1', 8080)
     httpd = HTTPServer(server_address, RequestHandler)
+
+    requestHandler = RequestHandler(None, None, None)
+
+    ip = '8.8.8.8'
+    _thread.start_new_thread(NetworkConnectivity(requestHandler.onPingPass, requestHandler.onPingFail).listenOn, (ip,))
+    print('Network connectivity running ...')
+
+    _thread.start_new_thread(UPSListener(UPS(), requestHandler.onPowerOn, requestHandler.onPowerOff).TurnOn, ())
+    print('UPS listener running ...')
+
     print('running server...')
     httpd.serve_forever()
 

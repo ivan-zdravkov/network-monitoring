@@ -1,4 +1,5 @@
 import smtplib
+import socket
 from email.mime.text import MIMEText
 
 
@@ -13,13 +14,17 @@ class SMTP:
         self.receivers = _receivers
 
     def send_email_message(self, subject, message):
-        msg = MIMEText(message)
-        msg['Subject'] = subject
-        msg['From'] = self.sender
-        msg['To'] = ", ".join(self.receivers)
+        try:
+            msg = MIMEText(message)
+            msg['Subject'] = subject
+            msg['From'] = self.sender
+            msg['To'] = ", ".join(self.receivers)
 
-        smtp = smtplib.SMTP('smtp.gmail.com', 587)
-        smtp.starttls()
-        smtp.login(self.sender, self.password);
-        smtp.send_message(msg)
-        smtp.close()
+            smtp = smtplib.SMTP('smtp.gmail.com', 587)
+            smtp.starttls()
+            smtp.login(self.sender, self.password)
+            smtp.send_message(msg)
+            smtp.close()
+        except socket.error as e:
+            print
+            "Could not send Email!"

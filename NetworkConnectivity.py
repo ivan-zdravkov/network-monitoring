@@ -1,5 +1,6 @@
 import subprocess
 import platform
+import time
 
 
 class NetworkConnectivity:
@@ -7,12 +8,14 @@ class NetworkConnectivity:
     onPingPass = None
     onPingFail = None
 
-    def __init__(self, onPingPass, onPingFail):
-        self.onPingPass = onPingPass
-        self.onPingFail = onPingFail
+    def __init__(self, _onPingPass, _onPingFail):
+        self.onPingPass = _onPingPass
+        self.onPingFail = _onPingFail
 
     def listenOn(self, host):
         while True:
+            time.sleep(5)
+
             passed = self.ping(host)
 
             response = {
