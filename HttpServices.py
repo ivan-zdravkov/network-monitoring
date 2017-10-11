@@ -4,7 +4,7 @@ import _thread
 from NetworkConnectivity import NetworkConnectivity
 from UPSListener import UPS
 from UPSListener import UPSListener
-from MongoDBRepo import MongoDBRepo
+from FileRepo import FileRepo
 from SMTP import SMTP
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
@@ -18,7 +18,7 @@ class RequestHandler(BaseHTTPRequestHandler):
     isThereInternet = True
 
     def __init__(self, request, client_address, server):
-        self.repo = MongoDBRepo()
+        self.repo = FileRepo()
 
     def get_routing(self, x):
         return {
