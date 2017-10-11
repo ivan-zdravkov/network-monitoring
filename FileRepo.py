@@ -1,3 +1,6 @@
+import json
+import ast
+
 class FileRepo:
     tempFileName = None
     upsFileName = None
@@ -9,22 +12,29 @@ class FileRepo:
         self.internetFileName = 'internet.txt'
 
     def getTemperature(self):
-        with open(self.tempFileName, 'r') as file:
-            last_temp = list(file)[-1]
+        # with open(self.tempFileName, 'r') as file:
+        #    if os.stat(file).st_size > 0:
+        #       last_temp = list(file)[-1]
 
-        return last_temp
+        return 30.0
 
     def getUPSStatus(self):
         with open(self.upsFileName, 'r') as file:
-            last_ups_status = list(file)[-1]
+            content = file.readlines()
+            content = [x.strip() for x in content]
+            last = content[0]
+            dataJson = ast.literal_eval(last)
 
-        return last_ups_status
+        return dataJson['isUpsOn']
 
     def getInternetStatus(self):
-        with open(self.internetFileName, 'r') as file:
-            internet_status = list(file)[-1]
+        with open(self.internetFileName) as file:
+            content = file.readlines()
+            content = [x.strip() for x in content]
+            last = content[0]
+            dataJson = ast.literal_eval(last)
 
-        return internet_status
+        return dataJson['isThereInternet']
 
     def updateUPSStatus(self, data):
         with open(self.upsFileName, 'w') as file:

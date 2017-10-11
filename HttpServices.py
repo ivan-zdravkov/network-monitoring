@@ -8,25 +8,15 @@ from FileRepo import FileRepo
 from SMTP import SMTP
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-
-# HTTPRequestHandler class
-class RequestHandler(BaseHTTPRequestHandler):
+class http_server:
     sender = 'tuplovdivproject@gmail.com'
     password = '61530412'
     receivers = ['IvanZdravkovBG@gmail.com', 'Trifon.Dardzhonov@gmail.com']
     repo = None
     isThereInternet = True
 
-    def __init__(self, request, client_address, server):
+    def __init__(self):
         self.repo = FileRepo()
-
-    def get_routing(self, x):
-        return {
-            '': self.welcome,
-            'getTemperature': self.get_temperature,
-            'getUPSStatus': self.get_UPS_Status,
-            'isThereInternet': self.ping_is_passing
-        }.get(x, '')
 
     def welcome(self):
         return 'Welcome to the HTTP Services'
@@ -35,10 +25,10 @@ class RequestHandler(BaseHTTPRequestHandler):
         return "The current temperature is " + str(self.repo.getTemperature())
 
     def get_UPS_Status(self):
-        return "The UPS is currently: " + 'ON' if self.repo.getUPSStatus() else 'OFF'
+        return "The UPS is currently: " + ('ON' if self.repo.getUPSStatus() else 'OFF')
 
     def ping_is_passing(self):
-        return "The internet connection is " + 'ON' if self.repo.getInternetStatus() else 'OFF'
+        return "The internet connection is " + ('ON' if self.repo.getInternetStatus() else 'OFF')
 
     def onPingPass(self, params):
         self.isThereInternet = True
@@ -85,6 +75,18 @@ class RequestHandler(BaseHTTPRequestHandler):
         SMTP(self.sender, self.password, self.receivers).send_email_message(subject, message)
         return
 
+# HTTPRequestHandler class
+class RequestHandler(BaseHTTPRequestHandler):
+    http_server_instance = None
+
+    def get_routing(self, x):
+        return {
+            '': self.http_server_instance.welcome,
+            'getTemperature': self.http_server_instance.get_temperature,
+            'getUPSStatus': self.http_server_instance.get_UPS_Status,
+            'isThereInternet': self.http_server_instance.ping_is_passing
+        }.get(x, '')
+
     def do_GET(self):
         # Send response status code
         self.send_response(200)
@@ -101,7 +103,6 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(bytes_result)
         return
 
-
 def run():
     print('starting server...')
 
@@ -110,13 +111,15 @@ def run():
     server_address = ('127.0.0.1', 8080)
     httpd = HTTPServer(server_address, RequestHandler)
 
-    requestHandler = RequestHandler(None, None, None)
+    server = http_server()
+
+    RequestHandler.http_server_instance = server
 
     ip = '8.8.8.8'
-    _thread.start_new_thread(NetworkConnectivity(requestHandler.onPingPass, requestHandler.onPingFail).listenOn, (ip,))
+    _thread.start_new_thread(NetworkConnectivity(server.onPingPass, server.onPingFail).listenOn, (ip,))
     print('Network connectivity running ...')
 
-    _thread.start_new_thread(UPSListener(UPS(), requestHandler.onPowerOn, requestHandler.onPowerOff).TurnOn, ())
+    _thread.start_new_thread(UPSListener(UPS(), server.onPowerOn, server.onPowerOff).TurnOn, ())
     print('UPS listener running ...')
 
     print('running server...')
