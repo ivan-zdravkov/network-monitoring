@@ -12,24 +12,30 @@ class NetworkConnectivity:
         self.onPingPass = _onPingPass
         self.onPingFail = _onPingFail
 
-    def listenOn(self, host):
+    def listenOn(self, hosts):
         while True:
             time.sleep(5)
 
-            passed = self.ping(host)
+			failed_hosts = []
+			
+			for host in hosts:
+				if self.ping(host) is False:
+					failed_hosts.append(host)
 
-            response = {
-                'timeElapsed': 23,
-                'host': host
-            }
+			response = {
+				'timeElapsed': 23,
+				'hosts': failed_hosts
+			}
 
-            if passed != self.previousState:
-                if passed is True:
-                    self.onPingPass(response)
-                else:
-                    self.onPingFail(response)
+			passed = if not failed_hosts
+			
+			if passed != self.previousState:
+				if passed is True:
+					self.onPingPass(response)
+				else:
+					self.onPingFail(response)
 
-                self.previousState = passed
+				self.previousState = passed
 
     def ping(self, host):
         """

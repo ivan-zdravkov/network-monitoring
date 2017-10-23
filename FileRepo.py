@@ -34,7 +34,7 @@ class FileRepo:
             last = content[0]
             dataJson = ast.literal_eval(last)
 
-        return dataJson['isThereInternet']
+        return dataJson
 
     def updateUPSStatus(self, data):
         with open(self.upsFileName, 'w') as file:

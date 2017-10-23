@@ -1,1 +1,1 @@
-{'timeElapsed': 23, 'host': '8.8.8.8', 'isThereInternet': True}
+{'timeElapsed': 23, 'hosts': ['8.8.8.8'], 'isThereInternet': True}

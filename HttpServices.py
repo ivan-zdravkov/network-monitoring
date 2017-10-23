@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import _thread
+import ConfigParser
 from NetworkConnectivity import NetworkConnectivity
 from UPSListener import UPS
 from UPSListener import UPSListener
@@ -9,9 +10,12 @@ from SMTP import SMTP
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 class http_server:
-    sender = 'tuplovdivproject@gmail.com'
-    password = '61530412'
-    receivers = ['IvanZdravkovBG@gmail.com', 'Trifon.Dardzhonov@gmail.com']
+    config = ConfigParser.ConfigParser()
+    config.read("config.ini")
+    
+    sender = config.get('Email', 'sender')
+    password = config.get('Email', 'password')
+    receivers = config.get('Email', 'receivers')
     repo = None
     isThereInternet = True
 
@@ -28,7 +32,10 @@ class http_server:
         return "The UPS is currently: " + ('ON' if self.repo.getUPSStatus() else 'OFF')
 
     def ping_is_passing(self):
-        return "The internet connection is " + ('ON' if self.repo.getInternetStatus() else 'OFF')
+		internet_status = self.repo.getInternetStatus()
+		
+        return "The internet connection is " + 
+			('ON' if internet_status.isThereInternet else ('OFF. No internet on: ' + internet_status.hosts + ' hosts'))
 
     def onPingPass(self, params):
         self.isThereInternet = True
@@ -104,19 +111,25 @@ class RequestHandler(BaseHTTPRequestHandler):
         return
 
 def run():
+	config = ConfigParser.ConfigParser()
+    config.read("config.ini")
+    
+    address = config.get('Server', 'address')
+	port = config.get('Server', 'port')
+
     print('starting server...')
 
     # Server settings
     # Choose port 8080, for port 80, which is normally used for a http server, you need root access
-    server_address = ('127.0.0.1', 8080)
+    server_address = (address, port)
     httpd = HTTPServer(server_address, RequestHandler)
 
     server = http_server()
 
     RequestHandler.http_server_instance = server
 
-    ip = '8.8.8.8'
-    _thread.start_new_thread(NetworkConnectivity(server.onPingPass, server.onPingFail).listenOn, (ip,))
+	ips = config.get('Network', 'ips')
+    _thread.start_new_thread(NetworkConnectivity(server.onPingPass, server.onPingFail).listenOn, (ips,))
     print('Network connectivity running ...')
 
     _thread.start_new_thread(UPSListener(UPS(), server.onPowerOn, server.onPowerOff).TurnOn, ())
