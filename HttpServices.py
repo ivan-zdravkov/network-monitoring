@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import _thread
 import configparser
 import ast
@@ -19,17 +18,21 @@ def receiversEmails(config):
     return receivers
 
 class http_server:
-    config = configparser.ConfigParser()
-    config.read("config.ini")
-    
-    sender = config.get('Email', 'sender')
-    password = config.get('Email', 'password')
-    receivers = receiversEmails(config)
+    sender = ''
+    password = ''
+    receivers = []
     repo = None
     networkProvider = NetworkConnectivity(None, None)
 
     def __init__(self):
         self.repo = FileRepo()
+
+        config = configparser.ConfigParser()
+        config.read("config.ini")
+
+        self.sender = config.get('Email', 'sender')
+        self.password = config.get('Email', 'password')
+        self.receivers = receiversEmails(config)
 
     def welcome(self):
         return 'Welcome to the HTTP Services'
@@ -46,12 +49,10 @@ class http_server:
 
     def onPingPass(self, params):
         self.updateInternetStatus(params)
-
         return
 
     def onPingFail(self, params):
         self.updateInternetStatus(params)
-
         return
 
     def onPowerOn(self, params):
