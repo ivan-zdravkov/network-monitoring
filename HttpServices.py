@@ -73,7 +73,10 @@ class http_server:
 
     def updateInternetStatus(self, data):
         self.repo.updateInternetStatus(data)
-        self.sendEmail('Internet ON', 'The internet just came ON on the server!')
+        internetStatusForHost = "ON" if str(data['isThereInternet']) else "OFF"
+        subject = 'Internet ' + internetStatusForHost
+        message = 'The internet just came ' + internetStatusForHost + ' on ' + data['host']
+        self.sendEmail(subject, message)
 
     def sendEmail(self, subject, message):
         if(self.networkProvider.ping('8.8.8.8')):
