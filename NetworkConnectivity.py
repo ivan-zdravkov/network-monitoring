@@ -4,7 +4,7 @@ import time
 
 
 class NetworkConnectivity:
-    previousState = True
+    previousState = {}
     onPingPass = None
     onPingFail = None
 
@@ -16,28 +16,26 @@ class NetworkConnectivity:
         while True:
             time.sleep(5)
 
-            failed_hosts = []
             for host in hosts:
-                if self.ping(host) is False:
-                    failed_hosts.append(host)
+                self.connectTo(host)
 
-            response = {
-                'timeElapsed': 23,
-                'hosts': failed_hosts
-            }
+    def connectTo(self, host):
+        passed = self.ping(host)
 
-            if not failed_hosts:
-                passed = True
+        response = {
+            'timeElapsed': 23,
+            'host': host
+        }
+
+        previousIPState = self.previousState.get(host)
+
+        if passed != previousIPState:
+            if passed is True:
+                self.onPingPass(response)
             else:
-                passed = False
+                self.onPingFail(response)
 
-            if passed != self.previousState:
-                if passed is True:
-                    self.onPingPass(response)
-                else:
-                    self.onPingFail(response)
-
-            self.previousState = passed
+        self.previousState[host] = passed
 
     def ping(self, host):
         """
