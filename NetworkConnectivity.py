@@ -24,7 +24,8 @@ class NetworkConnectivity:
 
         response = {
             'timeElapsed': 23,
-            'host': host
+            'host': host,
+            'isThereInternet': passed
         }
 
         previousIPState = self.previousState.get(host)

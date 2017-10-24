@@ -26,7 +26,7 @@ class http_server:
     password = config.get('Email', 'password')
     receivers = receiversEmails(config)
     repo = None
-    isThereInternet = True
+    networkProvider = NetworkConnectivity(None, None)
 
     def __init__(self):
         self.repo = FileRepo()
@@ -45,13 +45,11 @@ class http_server:
         return "The internet connection is " + ('ON' if internet_status.isThereInternet else ('OFF. No internet on: ' + internet_status.hosts + ' hosts'))
 
     def onPingPass(self, params):
-        self.isThereInternet = True
         self.updateInternetStatus(params)
 
         return
 
     def onPingFail(self, params):
-        self.isThereInternet = False
         self.updateInternetStatus(params)
 
         return
@@ -66,28 +64,20 @@ class http_server:
 
     def updateUPSStatus(self, isUpsOn, data):
         data['isUpsOn'] = isUpsOn
-        insertedId = self.repo.updateUPSStatus(data)
+        self.repo.updateUPSStatus(data)
 
-        if self.isThereInternet is True:
-            if isUpsOn is True:
-                self.sendEmail('Power ON', 'Power just came back!')
-            else:
-                self.sendEmail('Power DOWN', 'Power went down!')
-
-        return
+        if isUpsOn is True:
+            self.sendEmail('Power ON', 'Power just came back!')
+        else:
+            self.sendEmail('Power DOWN', 'Power went down!')
 
     def updateInternetStatus(self, data):
-        data['isThereInternet'] = self.isThereInternet
-        insertedId = self.repo.updateInternetStatus(data)
-
-        if self.isThereInternet is True:
-            self.sendEmail('Internet ON', 'The internet just came ON on the server!')
-
-        return
+        self.repo.updateInternetStatus(data)
+        self.sendEmail('Internet ON', 'The internet just came ON on the server!')
 
     def sendEmail(self, subject, message):
-        SMTP(self.sender, self.password, self.receivers).send_email_message(subject, message)
-        return
+        if(self.networkProvider.ping('8.8.8.8')):
+            SMTP(self.sender, self.password, self.receivers).send_email_message(subject, message)
 
 # HTTPRequestHandler class
 class RequestHandler(BaseHTTPRequestHandler):
