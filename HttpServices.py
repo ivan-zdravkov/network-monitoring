@@ -2,6 +2,7 @@
 
 import _thread
 import configparser
+import ast
 from NetworkConnectivity import NetworkConnectivity
 from UPSListener import UPS
 from UPSListener import UPSListener
@@ -108,6 +109,10 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(bytes_result)
         return
 
+def IpAddresses(config):
+    ipAddresses = ast.literal_eval(config.get('Network', 'ipAddresses'))
+    return ipAddresses
+
 def run():
     config = configparser.ConfigParser()
     config.read("config.ini")
@@ -126,7 +131,7 @@ def run():
 
     RequestHandler.http_server_instance = server
 
-    ips = config.get('Network', 'ips')
+    ips = IpAddresses(config)
     _thread.start_new_thread(NetworkConnectivity(server.onPingPass, server.onPingFail).listenOn, (ips,))
     print('Network connectivity running ...')
 
