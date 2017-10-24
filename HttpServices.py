@@ -10,13 +10,21 @@ from FileRepo import FileRepo
 from SMTP import SMTP
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
+def IpAddresses(config):
+    ipAddresses = ast.literal_eval(config.get('Network', 'ipAddresses'))
+    return ipAddresses
+
+def receiversEmails(config):
+    receivers = ast.literal_eval(config.get('Email', 'receivers'))
+    return receivers
+
 class http_server:
     config = configparser.ConfigParser()
     config.read("config.ini")
     
     sender = config.get('Email', 'sender')
     password = config.get('Email', 'password')
-    receivers = config.get('Email', 'receivers')
+    receivers = receiversEmails(config)
     repo = None
     isThereInternet = True
 
@@ -108,10 +116,6 @@ class RequestHandler(BaseHTTPRequestHandler):
         bytes_result = bytes(result, "utf8")
         self.wfile.write(bytes_result)
         return
-
-def IpAddresses(config):
-    ipAddresses = ast.literal_eval(config.get('Network', 'ipAddresses'))
-    return ipAddresses
 
 def run():
     config = configparser.ConfigParser()
