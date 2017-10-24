@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import _thread
-import ConfigParser
+import configparser
 from NetworkConnectivity import NetworkConnectivity
 from UPSListener import UPS
 from UPSListener import UPSListener
@@ -10,7 +10,7 @@ from SMTP import SMTP
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 class http_server:
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     config.read("config.ini")
     
     sender = config.get('Email', 'sender')
@@ -32,10 +32,8 @@ class http_server:
         return "The UPS is currently: " + ('ON' if self.repo.getUPSStatus() else 'OFF')
 
     def ping_is_passing(self):
-		internet_status = self.repo.getInternetStatus()
-		
-        return "The internet connection is " + 
-			('ON' if internet_status.isThereInternet else ('OFF. No internet on: ' + internet_status.hosts + ' hosts'))
+        internet_status = self.repo.getInternetStatus()
+        return "The internet connection is " + ('ON' if internet_status.isThereInternet else ('OFF. No internet on: ' + internet_status.hosts + ' hosts'))
 
     def onPingPass(self, params):
         self.isThereInternet = True
@@ -111,11 +109,11 @@ class RequestHandler(BaseHTTPRequestHandler):
         return
 
 def run():
-	config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     config.read("config.ini")
     
     address = config.get('Server', 'address')
-	port = config.get('Server', 'port')
+    port = config.get('Server', 'port')
 
     print('starting server...')
 
@@ -128,7 +126,7 @@ def run():
 
     RequestHandler.http_server_instance = server
 
-	ips = config.get('Network', 'ips')
+    ips = config.get('Network', 'ips')
     _thread.start_new_thread(NetworkConnectivity(server.onPingPass, server.onPingFail).listenOn, (ips,))
     print('Network connectivity running ...')
 
