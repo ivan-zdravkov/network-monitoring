@@ -113,7 +113,7 @@ def run():
     config.read("config.ini")
     
     address = config.get('Server', 'address')
-    port = config.get('Server', 'port')
+    port = int(config.get('Server', 'port'))
 
     print('starting server...')
 
