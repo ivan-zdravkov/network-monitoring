@@ -37,11 +37,11 @@ class FileRepo:
         return dataJson
 
     def updateUPSStatus(self, data):
-        with open(self.upsFileName, 'w') as file:
+        with open(self.upsFileName, 'a') as file:
             str_data = str(data)
             file.write(str_data + '\n')
 
     def updateInternetStatus(self, data):
-        with open(self.internetFileName, 'w') as file:
+        with open(self.internetFileName, 'a') as file:
             str_data = str(data)
             file.write(str_data + '\n')
