@@ -5,7 +5,7 @@ Network Monitoring System is team effort for the [Distributed Embeded Systems](h
 ## Team Members
 * Anton Tonev - toni9290@abv.bg
 * Velizar Minchev - velizar.minchev@yahoo.com
-* Ivan Zdravkov - ivanzdravkovbg@gmail.com
+* Ivan Zdravkov - ivan@zdravkov.dev
 * Trifon Dardjonov - trifon.dardzhonov@gmail.com
 
 ## Setup
